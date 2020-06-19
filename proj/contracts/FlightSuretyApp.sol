@@ -5,11 +5,12 @@ pragma solidity >=0.4.24 <0.7.0;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "./Operational.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
-contract FlightSuretyApp {
+contract FlightSuretyApp is Operational {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
     /********************************************************************************************/
@@ -24,8 +25,6 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
-    address private contractOwner;          // Account used to deploy contract
-
     struct Flight {
         bool isRegistered;
         uint8 statusCode;
@@ -33,35 +32,6 @@ contract FlightSuretyApp {
         address airline;
     }
     mapping(bytes32 => Flight) private flights;
-
- 
-    /********************************************************************************************/
-    /*                                       FUNCTION MODIFIERS                                 */
-    /********************************************************************************************/
-
-    // Modifiers help avoid duplication of code. They are typically used to validate something
-    // before a function is allowed to be executed.
-
-    /**
-    * @dev Modifier that requires the "operational" boolean variable to be "true"
-    *      This is used on all state changing functions to pause the contract in
-    *      the event there is an issue that needs to be fixed
-    */
-    modifier requireIsOperational()
-    {
-         // Modify to call data contract's status
-        require(true, "Contract is currently not operational");
-        _;  // All modifiers require an "_" which indicates where the function body will be added
-    }
-
-    /**
-    * @dev Modifier that requires the "ContractOwner" account to be the function caller
-    */
-    modifier requireContractOwner()
-    {
-        require(msg.sender == contractOwner, "Caller is not contract owner");
-        _;
-    }
 
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
@@ -71,18 +41,8 @@ contract FlightSuretyApp {
     * @dev Contract constructor
     *
     */
-    constructor() public
+    constructor() Operational() public
     {
-        contractOwner = msg.sender;
-    }
-
-    /********************************************************************************************/
-    /*                                       UTILITY FUNCTIONS                                  */
-    /********************************************************************************************/
-
-    function isOperational() public pure returns(bool)
-    {
-        return true;  // Modify to call data contract's status
     }
 
     /********************************************************************************************/
@@ -242,7 +202,7 @@ contract FlightSuretyApp {
 
     function getFlightKey(
         address airline, string flight, uint256 timestamp
-    ) pure internal returns(bytes32)
+    ) internal pure returns(bytes32)
     {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
