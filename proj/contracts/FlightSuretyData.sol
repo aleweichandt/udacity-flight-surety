@@ -4,8 +4,9 @@ import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./utils/Ownable.sol";
 import "./utils/Operational.sol";
 import "./utils/Callable.sol";
+import "./interface/IFlightSuretyData.sol";
 
-contract FlightSuretyData is Ownable, Operational, Callable {
+contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     using SafeMath for uint256;
 
     /********************************************************************************************/

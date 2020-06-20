@@ -7,10 +7,7 @@ pragma solidity >=0.4.24 <0.7.0;
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./utils/Ownable.sol";
 import "./utils/Operational.sol";
-
-interface FlightSuretyData {
-    function register(address contractAddress) external;
-}
+import "./interface/IFlightSuretyData.sol";
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
@@ -39,7 +36,7 @@ contract FlightSuretyApp is Ownable, Operational {
     mapping(bytes32 => Flight) private flights;
 
     // Data contract
-    FlightSuretyData private datasource;
+    IFlightSuretyData private datasource;
 
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
@@ -52,7 +49,7 @@ contract FlightSuretyApp is Ownable, Operational {
     constructor(address dataAddress) Ownable() public
     {
         // Register into datasource
-        datasource = FlightSuretyData(dataAddress);
+        datasource = IFlightSuretyData(dataAddress);
     }
 
     /********************************************************************************************/
