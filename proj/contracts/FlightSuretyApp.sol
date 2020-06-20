@@ -46,10 +46,12 @@ contract FlightSuretyApp is Ownable, Operational {
     * @dev Contract constructor
     *
     */
-    constructor(address dataAddress) Ownable() public
+    constructor(address dataAddress, address firstAirline) Ownable() public
     {
         // Register into datasource
         datasource = IFlightSuretyData(dataAddress);
+        //register first airline
+        datasource.registerAirline(firstAirline);
     }
 
     /********************************************************************************************/
@@ -60,9 +62,9 @@ contract FlightSuretyApp is Ownable, Operational {
     * @dev Add an airline to the registration queue
     *
     */
-    function registerAirline() external pure returns(bool success, uint256 votes)
+    function registerAirline(address airlineAddress) external returns(bool success, uint256 votes)
     {
-        return (success, 0);
+        return datasource.registerAirline(airlineAddress);
     }
 
 
