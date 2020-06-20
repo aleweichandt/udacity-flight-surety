@@ -17,7 +17,14 @@ interface IFlightSuretyData {
 
     function isAirline(address airline) external view returns(bool);
 
-    function isFundedAirline(address airline) external view returns(bool);
+    /**
+    * @dev Add an airline to the registration queue
+    *      Can only be called from FlightSuretyApp contract
+    *
+    */
+    function getAirlineFunds(address airline) external view returns(uint256);
+
+    function fundAirline(address airline) external payable;
 
    /**
     * @dev Buy insurance for a flight

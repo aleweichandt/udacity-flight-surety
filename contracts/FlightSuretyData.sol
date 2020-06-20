@@ -13,9 +13,21 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
 
+    uint256 private contractFunds = 0;
+
     uint256 private airlinesCount = 0;
     mapping(address => bool) private airlines;
     mapping(address => uint256) private airlineFunds;
+
+    /********************************************************************************************/
+    /*                                       FUNCTION MODIFIERS                                 */
+    /********************************************************************************************/
+
+    modifier requireAirline(address airline)
+    {
+        require(isAirline(airline), "Not an airline");
+        _;
+    }
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -55,16 +67,26 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         return airlines[airline];
     }
 
-    function isFundedAirline(address airline) public view returns(bool)
-    {
-        return airlineFunds[airline] > 10;
-    }
-
     function getAirlinesCount() external view returns (uint256)
     {
         return airlinesCount;
     }
 
+    /**
+    * @dev Add an airline to the registration queue
+    *      Can only be called from FlightSuretyApp contract
+    *
+    */
+    function getAirlineFunds(address airline) external view requireAirline(airline) returns(uint256)
+    {
+        return airlineFunds[airline];
+    }
+
+    function fundAirline(address airline) external payable requireIsOperational requireIsCallerAuthorized requireAirline(airline)
+    {
+        airlineFunds[airline] = airlineFunds[airline].add(msg.value);
+        contractFunds = contractFunds.add(msg.value);
+    }
 
    /**
     * @dev Buy insurance for a flight
@@ -98,6 +120,7 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     */
     function fund() public payable
     {
+        contractFunds = contractFunds.add(msg.value);
     }
 
     function getFlightKey(

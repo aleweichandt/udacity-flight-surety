@@ -37,6 +37,7 @@ contract FlightSuretyApp is Ownable, Operational {
 
     // Airline Management
     uint8 private constant MIN_AIRLINES_REGISTERED = 5;
+    uint256 private constant MIN_AIRLINE_FUNDS = 10;
 
     struct QueuedAddress {
         mapping(address => bool) votes; // who voted
@@ -51,6 +52,19 @@ contract FlightSuretyApp is Ownable, Operational {
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
 
+    modifier hasPayedEnough(uint256 expected)
+    {
+        require(msg.value >= expected, "Insufficient funds");
+        _;
+    }
+
+    modifier cashBack(uint256 value)
+    {
+        _;
+        uint256 rest = msg.value.sub(value);
+        msg.sender.transfer(rest);
+    }
+
     modifier registeredAirline()
     {
         require(datasource.isAirline(msg.sender), "Forbidden Access");
@@ -59,9 +73,10 @@ contract FlightSuretyApp is Ownable, Operational {
 
     modifier fundedAirline()
     {
-        require(datasource.isFundedAirline(msg.sender), "Forbidden Access, please register and fund");
+        require(datasource.getAirlineFunds(msg.sender) >= MIN_AIRLINE_FUNDS, "Forbidden Access, please register and fund");
         _;
     }
+
 
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
@@ -105,6 +120,15 @@ contract FlightSuretyApp is Ownable, Operational {
     {
         uint256 count = datasource.getAirlinesCount();
         return count < MIN_AIRLINES_REGISTERED || count.div(2) < queuedAirlines[airline].votesCount;
+    }
+
+   /**
+    * @dev Add funds to an airline.
+    *
+    */
+    function fund() external payable registeredAirline
+    {
+        datasource.fundAirline.value(msg.value)(msg.sender);
     }
 
 
