@@ -148,6 +148,97 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(result, true, "Airline should be able to register another airline if has enough funds");
 
   });
+
+  it('(airline) cannot register 5th airline without consensus', async () => {
+    
+    // ARRANGE
+    let thirdAirline = accounts[3];
+    let fourthAirline = accounts[4];
+    let fifthAirline = accounts[5];
+    try {
+        await config.flightSuretyApp.registerAirline(thirdAirline, {from: config.firstAirline});
+        await config.flightSuretyApp.registerAirline(fourthAirline, {from: config.firstAirline});
+    } catch(e) { }
+
+    // ACT
+    try {
+        await config.flightSuretyApp.registerAirline(fifthAirline, {from: config.firstAirline});
+    } catch(e) { }
+    let isThirdRegistered = await config.flightSuretyData.isAirline.call(thirdAirline);
+    let isFourthRegistered = await config.flightSuretyData.isAirline.call(fourthAirline);
+    let isFifthRegistered = await config.flightSuretyData.isAirline.call(fifthAirline);
+
+    // ASSERT
+    assert.equal(isThirdRegistered, true, "Third airline should be registered without consensus");
+    assert.equal(isFourthRegistered, true, "Fourth airline should be registered without consensus");
+    assert.equal(isFifthRegistered, false, "Fifth airline should not be registered without consensus");
+
+  });
+
+  it('(airline) cannot register 5th airline without consensus', async () => {
+    
+    // ARRANGE
+    let thirdAirline = accounts[3];
+    let fourthAirline = accounts[4];
+    let fifthAirline = accounts[5];
+
+    // ACT
+    try {
+        await config.flightSuretyApp.registerAirline(thirdAirline, {from: config.firstAirline});
+        await config.flightSuretyApp.registerAirline(fourthAirline, {from: config.firstAirline});
+        await config.flightSuretyApp.registerAirline(fifthAirline, {from: config.firstAirline});
+    } catch(e) { }
+    let isThirdRegistered = await config.flightSuretyData.isAirline.call(thirdAirline);
+    let isFourthRegistered = await config.flightSuretyData.isAirline.call(fourthAirline);
+    let isFifthRegistered = await config.flightSuretyData.isAirline.call(fifthAirline);
+
+    // ASSERT
+    assert.equal(isThirdRegistered, true, "Third airline should be registered without consensus");
+    assert.equal(isFourthRegistered, true, "Fourth airline should be registered without consensus");
+    assert.equal(isFifthRegistered, false, "Fifth airline should not be registered without consensus");
+
+  });
+
+  it('(airline) cannot vote more than once', async () => {
+    
+    // ARRANGE
+    let thirdAirline = accounts[3];
+    let fifthAirline = accounts[5];
+
+    // ACT
+    try {
+        //fund airline to be able to vote
+        await config.flightSuretyApp.fund({from: thirdAirline, value: 10});
+        // requires 2 more votes
+        await config.flightSuretyApp.registerAirline(fifthAirline, {from: thirdAirline});
+        await config.flightSuretyApp.registerAirline(fifthAirline, {from: thirdAirline});
+    } catch(e) { }
+    let isFifthRegistered = await config.flightSuretyData.isAirline.call(fifthAirline);
+
+    // ASSERT
+    assert.equal(isFifthRegistered, false, "airline cannot vote more than once");
+
+  });
+
+  it('(airline) can register 5th airline with consensus', async () => {
+    
+    // ARRANGE
+    let fourthAirline = accounts[4];
+    let fifthAirline = accounts[5];
+
+    // ACT
+    try {
+        //fund airline to be able to vote
+        await config.flightSuretyApp.fund({from: fourthAirline, value: 10});
+        // already has 2 votes
+        await config.flightSuretyApp.registerAirline(fifthAirline, {from: fourthAirline});
+    } catch(e) {}
+    let isFifthRegistered = await config.flightSuretyData.isAirline.call(fifthAirline);
+
+    // ASSERT
+    assert.equal(isFifthRegistered, true, "Fifth airline should be registered after consensus");
+
+  });
  
 
 });

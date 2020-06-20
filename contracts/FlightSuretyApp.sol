@@ -36,7 +36,7 @@ contract FlightSuretyApp is Ownable, Operational {
     mapping(bytes32 => Flight) private flights;
 
     // Airline Management
-    uint8 private constant MIN_AIRLINES_REGISTERED = 5;
+    uint8 private constant MIN_AIRLINES_REGISTERED = 4;
     uint256 private constant MIN_AIRLINE_FUNDS = 10;
 
     struct QueuedAddress {
