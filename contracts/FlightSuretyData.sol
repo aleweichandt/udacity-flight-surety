@@ -12,17 +12,10 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     /********************************************************************************************/
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
-    uint8 private constant MIN_AIRLINES_REGISTERED = 5;
 
-    struct Airline {
-        mapping(address => bool) votes; // who voted
-        uint256 votesCount; // votes
-        bool isRegistered; // registered after votes count
-        uint256 funds; // has been funded
-    }
-
-    mapping(address => Airline) airlines;
-    uint256 airlinesCount = 0;
+    uint256 private airlinesCount = 0;
+    mapping(address => bool) private airlines;
+    mapping(address => uint256) private airlineFunds;
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -33,24 +26,10 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     * @dev Constructor
     *      The deploying account becomes contractOwner
     */
-    constructor() Ownable() public
+    constructor(address firstAirline) Ownable() public
     {
-    }
-
-    /********************************************************************************************/
-    /*                                       FUNCTION MODIFIERS                                 */
-    /********************************************************************************************/
-
-    modifier registeredAirline()
-    {
-        require(isAirline(msg.sender), "Forbidden Access");
-        _;
-    }
-
-    modifier fundedAirline()
-    {
-        require(isFundedAirline(msg.sender), "Forbidden Access, please register and fund");
-        _;
+        airlines[firstAirline] = true;
+        airlinesCount = 1;
     }
 
     /********************************************************************************************/
@@ -64,32 +43,26 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     */
     function registerAirline(
         address airline
-    ) external requireIsOperational returns(bool success, uint256 votes)
+    ) external requireIsOperational requireIsCallerAuthorized
     {
-        require(airlinesCount == 0 || isFundedAirline(msg.sender), "Forbidden Access, please register and fund");
-        require(!isAirline(airline), "airline already registered");
-        require(!airlines[airline].votes[msg.sender], "Already voted");
-
-        airlines[airline].votes[msg.sender] = true;
-        airlines[airline].votesCount = airlines[airline].votesCount.add(1);
-        airlines[airline].isRegistered = airlinesCount <= MIN_AIRLINES_REGISTERED || airlinesCount.div(2) < airlines[airline].votesCount;
-        if(airlines[airline].isRegistered) {
-            airlinesCount = airlinesCount.add(1);
-        }
-
-        success = airlines[airline].isRegistered;
-        votes = airlines[airline].votesCount;
-        return (success, 0);
+        airlines[airline] = true;
+        airlineFunds[airline] = 0;
+        airlinesCount = airlinesCount.add(1);
     }
 
     function isAirline(address airline) public view returns(bool)
     {
-        return airlines[airline].isRegistered;
+        return airlines[airline];
     }
 
     function isFundedAirline(address airline) public view returns(bool)
     {
-        return airlines[airline].funds > 10;
+        return airlineFunds[airline] > 10;
+    }
+
+    function getAirlinesCount() external view returns (uint256)
+    {
+        return airlinesCount;
     }
 
 

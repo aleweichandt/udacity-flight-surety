@@ -11,8 +11,13 @@ interface IFlightSuretyData {
     *      Can only be called from FlightSuretyApp contract
     *
     */
-    function registerAirline(address airline) external returns(bool success, uint256 votes);
+    function registerAirline(address airline) external;
 
+    function getAirlinesCount() external view returns (uint256);
+
+    function isAirline(address airline) external view returns(bool);
+
+    function isFundedAirline(address airline) external view returns(bool);
 
    /**
     * @dev Buy insurance for a flight

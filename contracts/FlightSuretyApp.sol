@@ -35,8 +35,33 @@ contract FlightSuretyApp is Ownable, Operational {
     }
     mapping(bytes32 => Flight) private flights;
 
+    // Airline Management
+    uint8 private constant MIN_AIRLINES_REGISTERED = 5;
+
+    struct QueuedAddress {
+        mapping(address => bool) votes; // who voted
+        uint256 votesCount; // votes
+    }
+    mapping(address => QueuedAddress) private queuedAirlines;
+
     // Data contract
     IFlightSuretyData private datasource;
+
+    /********************************************************************************************/
+    /*                                       FUNCTION MODIFIERS                                 */
+    /********************************************************************************************/
+
+    modifier registeredAirline()
+    {
+        require(datasource.isAirline(msg.sender), "Forbidden Access");
+        _;
+    }
+
+    modifier fundedAirline()
+    {
+        require(datasource.isFundedAirline(msg.sender), "Forbidden Access, please register and fund");
+        _;
+    }
 
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
@@ -46,12 +71,10 @@ contract FlightSuretyApp is Ownable, Operational {
     * @dev Contract constructor
     *
     */
-    constructor(address dataAddress, address firstAirline) Ownable() public
+    constructor(address dataAddress) Ownable() public
     {
         // Register into datasource
         datasource = IFlightSuretyData(dataAddress);
-        //register first airline
-        datasource.registerAirline(firstAirline);
     }
 
     /********************************************************************************************/
@@ -62,9 +85,26 @@ contract FlightSuretyApp is Ownable, Operational {
     * @dev Add an airline to the registration queue
     *
     */
-    function registerAirline(address airlineAddress) external returns(bool success, uint256 votes)
+    function registerAirline(address airline) public fundedAirline returns(bool success, uint256 votes)
     {
-        return datasource.registerAirline(airlineAddress);
+        require(!datasource.isAirline(airline), "airline already registered");
+        require(!queuedAirlines[airline].votes[msg.sender], "Already voted");
+
+        queuedAirlines[airline].votes[msg.sender] = true;
+        queuedAirlines[airline].votesCount = queuedAirlines[airline].votesCount.add(1);
+
+        votes = queuedAirlines[airline].votesCount;
+        success = hasEnoughVotes(airline);
+        if(success) {
+            datasource.registerAirline(airline);
+        }
+        return (success, 0);
+    }
+
+    function hasEnoughVotes(address airline) internal view returns (bool)
+    {
+        uint256 count = datasource.getAirlinesCount();
+        return count < MIN_AIRLINES_REGISTERED || count.div(2) < queuedAirlines[airline].votesCount;
     }
 
 
