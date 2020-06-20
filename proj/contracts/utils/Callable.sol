@@ -16,13 +16,18 @@ contract Callable is Ownable {
 
     modifier requireIsCallerAuthorized()
     {
-        require(authorizedContracts[msg.sender], "Caller is not authorized");
+        require(isAuthorised(), "Caller is not authorized");
         _;
     }
 
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
+
+    function isAuthorised() internal view returns (bool)
+    {
+        return isContractOwner() || authorizedContracts[msg.sender];
+    }
 
     function authorizeCaller(address contractAddress) external requireContractOwner
     {

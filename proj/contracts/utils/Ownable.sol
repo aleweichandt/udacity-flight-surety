@@ -17,8 +17,12 @@ contract Ownable {
     */
     modifier requireContractOwner()
     {
-        require(msg.sender == contractOwner, "Caller is not contract owner");
+        require(isContractOwner(), "Caller is not contract owner");
         _;
+    }
+
+    function isContractOwner() internal view returns (bool) {
+        return msg.sender == contractOwner;
     }
 
     /********************************************************************************************/
