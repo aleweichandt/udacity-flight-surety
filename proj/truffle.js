@@ -1,4 +1,4 @@
-const HDWalletProvider = require('@truffle/hdwallet-provider');
+const HDWalletProvider = require('truffle-hdwallet-provider');
 const infuraKey = "265e73b55a2f48e388d1ae298e3488e6";
 
 const fs = require('fs');
@@ -25,7 +25,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.6.9",
+      version: "0.4.24",
       settings: {
         optimizer: {
           enabled: true,
