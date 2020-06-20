@@ -1,9 +1,11 @@
 pragma solidity >=0.4.24 <0.7.0;
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./Operational.sol";
+import "./utils/Ownable.sol";
+import "./utils/Operational.sol";
+import "./utils/Callable.sol";
 
-contract FlightSuretyData is Operational {
+contract FlightSuretyData is Ownable, Operational, Callable {
     using SafeMath for uint256;
 
     /********************************************************************************************/
@@ -15,7 +17,7 @@ contract FlightSuretyData is Operational {
     * @dev Constructor
     *      The deploying account becomes contractOwner
     */
-    constructor() Operational() public
+    constructor() Ownable() public
     {
     }
 

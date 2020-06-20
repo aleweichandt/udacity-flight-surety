@@ -5,12 +5,17 @@ pragma solidity >=0.4.24 <0.7.0;
 // More info: https://www.nccgroup.trust/us/about-us/newsroom-and-events/blog/2018/november/smart-contract-insecurity-bad-arithmetic/
 
 import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "./Operational.sol";
+import "./utils/Ownable.sol";
+import "./utils/Operational.sol";
+
+interface FlightSuretyData {
+    function register(address contractAddress) external;
+}
 
 /************************************************** */
 /* FlightSurety Smart Contract                      */
 /************************************************** */
-contract FlightSuretyApp is Operational {
+contract FlightSuretyApp is Ownable, Operational {
     using SafeMath for uint256; // Allow SafeMath functions to be called for all uint256 types (similar to "prototype" in Javascript)
 
     /********************************************************************************************/
@@ -33,6 +38,9 @@ contract FlightSuretyApp is Operational {
     }
     mapping(bytes32 => Flight) private flights;
 
+    // Data contract
+    FlightSuretyData private datasource;
+
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -41,14 +49,15 @@ contract FlightSuretyApp is Operational {
     * @dev Contract constructor
     *
     */
-    constructor() Operational() public
+    constructor(address dataAddress) Ownable() public
     {
+        // Register into datasource
+        datasource = FlightSuretyData(dataAddress);
     }
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
-
 
    /**
     * @dev Add an airline to the registration queue
