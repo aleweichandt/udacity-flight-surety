@@ -312,6 +312,26 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(insurance, funds, "User should not be allowed to add more 1 ether");
 
   });
+
+  it('(passenger) can not withdraw funds if none available for him', async () => {
+    
+    // ARRANGE
+    const { client } = config;
+    const funds = web3.utils.toWei("1", "ether");
+
+    // ACT
+    let exception = null;
+    try {
+        // user already has max ether funded
+        await config.flightSuretyApp.withdrawFunds(funds, {from: client});
+    } catch(e) {
+        exception = e.message;
+    }
+
+    // ASSERT
+    assert.notEqual(exception, null, "User should not be allowed to withdraw funds");
+
+  });
  
 
 });
