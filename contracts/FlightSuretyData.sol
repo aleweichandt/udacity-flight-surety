@@ -24,8 +24,15 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         uint8 statusCode;
         uint256 updatedTimestamp;
         address airline;
+        address[] insurees;
     }
     mapping(bytes32 => Flight) private flights;
+
+    struct Client {
+        mapping(bytes32 => uint256) insurance;
+        uint256 funds;
+    }
+    mapping(address => Client) private clients;
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -34,6 +41,24 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     modifier requireAirline(address airline)
     {
         require(isAirline(airline), "Not an airline");
+        _;
+    }
+
+    modifier requireFlight(bytes32 flight)
+    {
+        require(flights[flight].isRegistered, "Flight does not exist");
+        _;
+    }
+
+    modifier hasEnough(address client, uint256 amount)
+    {
+        require(clients[client].funds >= amount, "Insufficient client funds");
+        _;
+    }
+
+    modifier isAffordable(uint256 amount)
+    {
+        require(contractFunds >= amount, "Insufficient contract funds");
         _;
     }
 
@@ -54,6 +79,10 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
+    /********************************************************************************************/
+
+    /********************************************************************************************/
+    /*                                     AIRLINES                                             */
     /********************************************************************************************/
 
    /**
@@ -96,7 +125,11 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         contractFunds = contractFunds.add(msg.value);
     }
 
-    /**
+    /********************************************************************************************/
+    /*                                     FLIGHTS                                             */
+    /********************************************************************************************/
+
+   /**
     * @dev Add a flight to the registry
     *      Can only be called from FlightSuretyApp contract
     *
@@ -111,7 +144,8 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
             isRegistered: true,
             statusCode: statusCode,
             updatedTimestamp: now,
-            airline: airline
+            airline: airline,
+            insurees: new address[](0)
         });
     }
 
@@ -120,14 +154,9 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         return flights[flight].isRegistered;
     }
 
-
-   /**
-    * @dev Buy insurance for a flight
-    *
-    */
-    function buy() external payable
+    function getFlightStatus(bytes32 flight) external view requireFlight(flight) returns(uint8)
     {
-
+        return flights[flight].statusCode;
     }
 
     /**
@@ -136,14 +165,36 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     function creditInsurees() external pure
     {
     }
-    
+
+    /********************************************************************************************/
+    /*                                     PASSENGERS                                           */
+    /********************************************************************************************/
+
+   /**
+    * @dev Buy insurance for a flight
+    *
+    */
+    function buy(
+        address client, bytes32 flight
+    ) external payable requireIsOperational requireIsCallerAuthorized requireFlight(flight)
+    {
+        clients[client].insurance[flight] = clients[client].insurance[flight].add(msg.value);
+        flights[flight].insurees.push(client);
+        flights[flight].updatedTimestamp = now;
+        contractFunds = contractFunds.add(msg.value);
+    }
 
     /**
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay() external pure
+    function pay(
+        address client, uint256 amount
+    ) external requireIsOperational requireIsCallerAuthorized hasEnough(client, amount) isAffordable(amount)
     {
+        clients[client].funds = clients[client].funds.sub(amount);
+        contractFunds = contractFunds.sub(amount);
+        client.transfer(amount);
     }
 
    /**

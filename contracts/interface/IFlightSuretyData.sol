@@ -37,11 +37,13 @@ interface IFlightSuretyData {
 
     function isFlight(bytes32 flight) external view returns (bool);
 
+    function getFlightStatus(bytes32 flight) external view returns(uint8);
+
    /**
     * @dev Buy insurance for a flight
     *
     */
-    function buy() external payable;
+    function buy(address client, bytes32 flight) external payable;
 
     /**
      *  @dev Credits payouts to insurees
@@ -52,7 +54,7 @@ interface IFlightSuretyData {
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay() external pure;
+    function pay(address client, uint256 amount) external;
 
    /**
     * @dev Initial funding for the insurance. Unless there are too many delayed flights

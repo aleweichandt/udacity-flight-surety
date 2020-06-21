@@ -44,12 +44,6 @@ contract FlightSuretyApp is Ownable, Operational {
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
 
-    modifier hasPayedEnough(uint256 expected)
-    {
-        require(msg.value >= expected, "Insufficient funds");
-        _;
-    }
-
     modifier cashBack(uint256 value)
     {
         _;
@@ -66,6 +60,20 @@ contract FlightSuretyApp is Ownable, Operational {
     modifier fundedAirline()
     {
         require(datasource.getAirlineFunds(msg.sender) >= MIN_AIRLINE_FUNDS, "Forbidden Access, please register and fund");
+        _;
+    }
+
+    modifier openFlight(address airline, string memory flight, uint256 timestamp)
+    {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        require(datasource.getFlightStatus(key) == STATUS_CODE_UNKNOWN, "Flight has been closed");
+        _;
+    }
+
+    modifier closedFlight(address airline, string memory flight, uint256 timestamp)
+    {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        require(datasource.getFlightStatus(key) != STATUS_CODE_UNKNOWN, "Flight is still open");
         _;
     }
 
@@ -98,6 +106,10 @@ contract FlightSuretyApp is Ownable, Operational {
 
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
+    /********************************************************************************************/
+
+    /********************************************************************************************/
+    /*                                     AIRLINES                                             */
     /********************************************************************************************/
 
    /**
@@ -135,6 +147,9 @@ contract FlightSuretyApp is Ownable, Operational {
         datasource.fundAirline.value(msg.value)(msg.sender);
     }
 
+    /********************************************************************************************/
+    /*                                     FLIGHTS                                             */
+    /********************************************************************************************/
 
    /**
     * @dev Register a future flight for insuring.
@@ -183,6 +198,26 @@ contract FlightSuretyApp is Ownable, Operational {
         emit OracleRequest(index, airline, flight, timestamp);
     }
 
+    /********************************************************************************************/
+    /*                                     PASSENGERS                                           */
+    /********************************************************************************************/
+
+    function buyInsurance(
+        address airline, string flight, uint256 timestamp
+    ) external payable requireIsOperational openFlight(airline, flight, timestamp) cashBack(1 ether)
+    {
+        uint256 value = msg.value;
+        if(value > 1 ether) {
+            value = 1 ether;
+        }
+        bytes32 flightKey = getFlightKey(msg.sender, flight, timestamp);
+        datasource.buy.value(value)(msg.sender, flightKey);
+    }
+
+    function withdrawFunds(uint256 amount) external requireIsOperational
+    {
+        datasource.pay(msg.sender, amount);
+    }
 
 // region ORACLE MANAGEMENT
 
