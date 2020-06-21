@@ -37,13 +37,15 @@ interface IFlightSuretyData {
 
     function isFlight(bytes32 flight) external view returns (bool);
 
-    function getFlightStatus(bytes32 flight) external view returns(uint8);
+    function getFlightStatus(bytes32 flight) external view returns (uint8);
 
    /**
     * @dev Buy insurance for a flight
     *
     */
     function buy(address client, bytes32 flight) external payable;
+
+    function getInsurance(address client, bytes32 flight) external view returns (uint256);
 
     /**
      *  @dev Credits payouts to insurees

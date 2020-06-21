@@ -206,12 +206,20 @@ contract FlightSuretyApp is Ownable, Operational {
         address airline, string flight, uint256 timestamp
     ) external payable requireIsOperational openFlight(airline, flight, timestamp) cashBack(1 ether)
     {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        require(datasource.getInsurance(msg.sender, flightKey) == 0, "Insurance already applied");
         uint256 value = msg.value;
         if(value > 1 ether) {
             value = 1 ether;
         }
-        bytes32 flightKey = getFlightKey(msg.sender, flight, timestamp);
         datasource.buy.value(value)(msg.sender, flightKey);
+    }
+
+    function getInsurance(
+        address airline, string flight, uint256 timestamp
+    ) external view returns (uint256) {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        return datasource.getInsurance(msg.sender, flightKey);
     }
 
     function withdrawFunds(uint256 amount) external requireIsOperational

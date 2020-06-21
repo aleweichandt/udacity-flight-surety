@@ -245,8 +245,8 @@ contract('Flight Surety Tests', async (accounts) => {
   it('(passenger) can register flight', async () => {
     
     // ARRANGE
-    const timestamp = Math.floor(Date.now() / 1000);
-    const flight = "test";
+    const timestamp = config.flightTs;
+    const flight = config.flightName;
 
     // ACT
     try {
@@ -274,6 +274,42 @@ contract('Flight Surety Tests', async (accounts) => {
 
     // ASSERT
     assert.equal(flightRegistered, false, "Not funded airline should not register flight");
+
+  });
+
+  it('(passenger) can buy insurance for a registered flight up to 1 ether', async () => {
+    
+    // ARRANGE
+    const { flightTs: timestamp, flightName: flight, firstAirline: airline, client } = config;
+    const funds = web3.utils.toWei("2", "ether");
+    const expected = web3.utils.toWei("1", "ether");
+
+    // ACT
+    try {
+        await config.flightSuretyApp.buyInsurance(airline, flight, timestamp, {from: client, value: funds});
+    } catch(e) {}
+    const insurance = await config.flightSuretyApp.getInsurance.call(airline, flight, timestamp, {from: client});
+
+    // ASSERT
+    assert.equal(insurance, expected, "User should buy insurance as expected");
+
+  });
+
+  it('(passenger) can not buy same insurance for a registered flight', async () => {
+    
+    // ARRANGE
+    const { flightTs: timestamp, flightName: flight, firstAirline: airline, client } = config;
+    const funds = web3.utils.toWei("1", "ether");
+
+    // ACT
+    try {
+        // user already has max ether funded
+        await config.flightSuretyApp.buyInsurance(airline, flight, timestamp, {from: client, value: funds});
+    } catch(e) {}
+    const insurance = await config.flightSuretyApp.getInsurance.call(airline, flight, timestamp, {from: client});
+
+    // ASSERT
+    assert.equal(insurance, funds, "User should not be allowed to add more 1 ether");
 
   });
  

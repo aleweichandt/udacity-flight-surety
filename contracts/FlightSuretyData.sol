@@ -184,6 +184,11 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         contractFunds = contractFunds.add(msg.value);
     }
 
+    function getInsurance(address client, bytes32 flight) external view requireFlight(flight) returns (uint256)
+    {
+        return clients[client].insurance[flight];
+    }
+
     /**
      *  @dev Transfers eligible payout funds to insuree
      *
@@ -195,6 +200,11 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         clients[client].funds = clients[client].funds.sub(amount);
         contractFunds = contractFunds.sub(amount);
         client.transfer(amount);
+    }
+
+    function getFunds(address client) external view returns (uint256)
+    {
+        return clients[client].funds;
     }
 
    /**
