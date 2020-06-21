@@ -102,13 +102,12 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     *
     */
     function registerFlight(
-        address airline, string flight, uint256 timestamp, uint8 statusCode
+        address airline, bytes32 flight, uint8 statusCode
     ) external requireIsOperational requireIsCallerAuthorized requireAirline(airline)
     {
-        bytes32 key = getFlightKey(airline, flight, timestamp);
-        require(!flights[key].isRegistered, "Flight alredy exist");
+        require(!flights[flight].isRegistered, "Flight alredy exist");
 
-        flights[key] = Flight({
+        flights[flight] = Flight({
             isRegistered: true,
             statusCode: statusCode,
             updatedTimestamp: now,
@@ -116,10 +115,9 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         });
     }
 
-    function isFlight(address airline, string flight, uint256 timestamp) external view returns (bool)
+    function isFlight(bytes32 flight) external view returns (bool)
     {
-        bytes32 key = getFlightKey(airline, flight, timestamp);
-        return flights[key].isRegistered;
+        return flights[flight].isRegistered;
     }
 
 
@@ -156,13 +154,6 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     function fund() public payable
     {
         contractFunds = contractFunds.add(msg.value);
-    }
-
-    function getFlightKey(
-        address airline, string memory flight, uint256 timestamp
-    ) internal pure returns(bytes32)
-    {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
     /**

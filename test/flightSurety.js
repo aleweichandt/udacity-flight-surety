@@ -252,7 +252,7 @@ contract('Flight Surety Tests', async (accounts) => {
     try {
         await config.flightSuretyApp.registerFlight(flight, timestamp, {from: config.firstAirline});
     } catch(e) {}
-    const flightRegistered = await config.flightSuretyData.isFlight.call(config.firstAirline, flight, timestamp);
+    const flightRegistered = await config.flightSuretyApp.hasRegisteredFlight.call(flight, timestamp, {from:config.firstAirline});
 
     // ASSERT
     assert.equal(flightRegistered, true, "Flight should be registered");
@@ -270,7 +270,7 @@ contract('Flight Surety Tests', async (accounts) => {
     try {
         await config.flightSuretyApp.registerFlight(flight, timestamp, {from: fifthAirline});
     } catch(e) {}
-    const flightRegistered = await config.flightSuretyData.isFlight.call(fifthAirline, flight, timestamp);
+    const flightRegistered = await config.flightSuretyApp.hasRegisteredFlight.call(flight, timestamp, {from: fifthAirline});
 
     // ASSERT
     assert.equal(flightRegistered, false, "Not funded airline should not register flight");

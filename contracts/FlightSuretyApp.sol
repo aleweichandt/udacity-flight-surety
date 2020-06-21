@@ -85,6 +85,18 @@ contract FlightSuretyApp is Ownable, Operational {
     }
 
     /********************************************************************************************/
+    /*                                     UTILITY CONTRACT FUNCTIONS                           */
+    /********************************************************************************************/
+
+
+    function getFlightKey(
+        address airline, string memory flight, uint256 timestamp
+    ) internal pure returns(bytes32)
+    {
+        return keccak256(abi.encodePacked(airline, flight, timestamp));
+    }
+
+    /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
 
@@ -130,9 +142,17 @@ contract FlightSuretyApp is Ownable, Operational {
     */
     function registerFlight(
         string flight, uint256 timestamp
-    ) external requireIsOperational fundedAirline
+    ) external requireIsOperational fundedAirline returns (bytes32)
     {
-        datasource.registerFlight(msg.sender, flight, timestamp, STATUS_CODE_UNKNOWN);
+        bytes32 flightKey = getFlightKey(msg.sender, flight, timestamp);
+        datasource.registerFlight(msg.sender, flightKey, STATUS_CODE_UNKNOWN);
+        return flightKey;
+    }
+
+    function hasRegisteredFlight(string flight, uint256 timestamp) external view returns (bool)
+    {
+        bytes32 flightKey = getFlightKey(msg.sender, flight, timestamp);
+        return datasource.isFlight(flightKey);
     }
 
    /**
