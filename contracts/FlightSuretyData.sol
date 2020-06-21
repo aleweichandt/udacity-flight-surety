@@ -19,6 +19,14 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
     mapping(address => bool) private airlines;
     mapping(address => uint256) private airlineFunds;
 
+    struct Flight {
+        bool isRegistered;
+        uint8 statusCode;
+        uint256 updatedTimestamp;
+        address airline;
+    }
+    mapping(bytes32 => Flight) private flights;
+
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
@@ -87,6 +95,33 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         airlineFunds[airline] = airlineFunds[airline].add(msg.value);
         contractFunds = contractFunds.add(msg.value);
     }
+
+    /**
+    * @dev Add a flight to the registry
+    *      Can only be called from FlightSuretyApp contract
+    *
+    */
+    function registerFlight(
+        address airline, string flight, uint256 timestamp, uint8 statusCode
+    ) external requireIsOperational requireIsCallerAuthorized requireAirline(airline)
+    {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        require(!flights[key].isRegistered, "Flight alredy exist");
+
+        flights[key] = Flight({
+            isRegistered: true,
+            statusCode: statusCode,
+            updatedTimestamp: now,
+            airline: airline
+        });
+    }
+
+    function isFlight(address airline, string flight, uint256 timestamp) external view returns (bool)
+    {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        return flights[key].isRegistered;
+    }
+
 
    /**
     * @dev Buy insurance for a flight

@@ -26,6 +26,17 @@ interface IFlightSuretyData {
 
     function fundAirline(address airline) external payable;
 
+    /**
+    * @dev Add a flight to the registry
+    *      Can only be called from FlightSuretyApp contract
+    *
+    */
+    function registerFlight(
+        address airline, string flight, uint256 timestamp, uint8 statusCode
+    ) external;
+
+    function isFlight(address airline, string flight, uint256 timestamp) external view returns (bool);
+
    /**
     * @dev Buy insurance for a flight
     *

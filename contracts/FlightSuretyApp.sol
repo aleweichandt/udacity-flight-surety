@@ -27,14 +27,6 @@ contract FlightSuretyApp is Ownable, Operational {
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
-    struct Flight {
-        bool isRegistered;
-        uint8 statusCode;
-        uint256 updatedTimestamp;
-        address airline;
-    }
-    mapping(bytes32 => Flight) private flights;
-
     // Airline Management
     uint8 private constant MIN_AIRLINES_REGISTERED = 4;
     uint256 private constant MIN_AIRLINE_FUNDS = 10 ether;
@@ -140,21 +132,7 @@ contract FlightSuretyApp is Ownable, Operational {
         string flight, uint256 timestamp
     ) external requireIsOperational fundedAirline
     {
-        bytes32 key = getFlightKey(msg.sender, flight, timestamp);
-        require(!flights[key].isRegistered, "Flight alredy exist");
-
-        flights[key] = Flight({
-            isRegistered: true,
-            statusCode: STATUS_CODE_UNKNOWN,
-            updatedTimestamp: now,
-            airline: msg.sender
-        });
-    }
-
-    function isFlight(address airline, string flight, uint256 timestamp) external view returns (bool)
-    {
-        bytes32 key = getFlightKey(airline, flight, timestamp);
-        return flights[key].isRegistered;
+        datasource.registerFlight(msg.sender, flight, timestamp, STATUS_CODE_UNKNOWN);
     }
 
    /**
@@ -285,14 +263,6 @@ contract FlightSuretyApp is Ownable, Operational {
             // Handle flight status as appropriate
             processFlightStatus(airline, flight, timestamp, statusCode);
         }
-    }
-
-
-    function getFlightKey(
-        address airline, string flight, uint256 timestamp
-    ) internal pure returns(bytes32)
-    {
-        return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
     // Returns array of three non-duplicating integers from 0-9
