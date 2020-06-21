@@ -136,9 +136,25 @@ contract FlightSuretyApp is Ownable, Operational {
     * @dev Register a future flight for insuring.
     *
     */
-    function registerFlight() external pure
+    function registerFlight(
+        string flight, uint256 timestamp
+    ) external requireIsOperational fundedAirline
     {
+        bytes32 key = getFlightKey(msg.sender, flight, timestamp);
+        require(!flights[key].isRegistered, "Flight alredy exist");
 
+        flights[key] = Flight({
+            isRegistered: true,
+            statusCode: STATUS_CODE_UNKNOWN,
+            updatedTimestamp: now,
+            airline: msg.sender
+        });
+    }
+
+    function isFlight(address airline, string flight, uint256 timestamp) external view returns (bool)
+    {
+        bytes32 key = getFlightKey(airline, flight, timestamp);
+        return flights[key].isRegistered;
     }
 
    /**

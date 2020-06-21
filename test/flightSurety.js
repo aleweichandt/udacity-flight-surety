@@ -241,6 +241,41 @@ contract('Flight Surety Tests', async (accounts) => {
     assert.equal(isFifthRegistered, true, "Fifth airline should be registered after consensus");
 
   });
+
+  it('(passenger) can register flight', async () => {
+    
+    // ARRANGE
+    const timestamp = Math.floor(Date.now() / 1000);
+    const flight = "test";
+
+    // ACT
+    try {
+        await config.flightSuretyApp.registerFlight(flight, timestamp, {from: config.firstAirline});
+    } catch(e) {}
+    const flightRegistered = await config.flightSuretyApp.isFlight.call(config.firstAirline, flight, timestamp);
+
+    // ASSERT
+    assert.equal(flightRegistered, true, "Flight should be registered");
+
+  });
+
+  it('(passenger) can not register flight if not funded', async () => {
+    
+    // ARRANGE
+    const fifthAirline = accounts[5];
+    const timestamp = Math.floor(Date.now() / 1000);
+    const flight = "test2";
+
+    // ACT
+    try {
+        await config.flightSuretyApp.registerFlight(flight, timestamp, {from: fifthAirline});
+    } catch(e) {}
+    const flightRegistered = await config.flightSuretyApp.isFlight.call(fifthAirline, flight, timestamp);
+
+    // ASSERT
+    assert.equal(flightRegistered, false, "Not funded airline should not register flight");
+
+  });
  
 
 });
