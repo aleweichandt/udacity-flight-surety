@@ -31,6 +31,8 @@ contract FlightSuretyApp is Ownable, Operational {
     uint8 private constant MIN_AIRLINES_REGISTERED = 4;
     uint256 private constant MIN_AIRLINE_FUNDS = 10 ether;
 
+    uint256 private INSURANCE_MULTIPLIER = 1;
+
     struct QueuedAddress {
         mapping(address => bool) votes; // who voted
         uint256 votesCount; // votes
@@ -90,6 +92,7 @@ contract FlightSuretyApp is Ownable, Operational {
     {
         // Register into datasource
         datasource = IFlightSuretyData(dataAddress);
+        INSURANCE_MULTIPLIER = INSURANCE_MULTIPLIER.mul(3).div(2);
     }
 
     /********************************************************************************************/
@@ -176,8 +179,14 @@ contract FlightSuretyApp is Ownable, Operational {
     */
     function processFlightStatus(
         address airline, string memory flight, uint256 timestamp, uint8 statusCode
-    ) internal pure
+    ) internal openFlight(airline, flight, timestamp)
     {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
+        datasource.updateFlightStatus(flightKey, statusCode);
+
+        if(statusCode == STATUS_CODE_LATE_AIRLINE) {
+            datasource.creditInsurees(flightKey, INSURANCE_MULTIPLIER);
+        }
     }
 
 

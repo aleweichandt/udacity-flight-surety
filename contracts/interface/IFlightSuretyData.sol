@@ -39,6 +39,8 @@ interface IFlightSuretyData {
 
     function getFlightStatus(bytes32 flight) external view returns (uint8);
 
+    function updateFlightStatus(bytes32 flight, uint8 status) external;
+
    /**
     * @dev Buy insurance for a flight
     *
@@ -50,7 +52,7 @@ interface IFlightSuretyData {
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees() external pure;
+    function creditInsurees(bytes32 flight, uint256 multiplier) external;
 
     /**
      *  @dev Transfers eligible payout funds to insuree

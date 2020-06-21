@@ -159,11 +159,30 @@ contract FlightSuretyData is Ownable, Operational, Callable, IFlightSuretyData {
         return flights[flight].statusCode;
     }
 
+    function updateFlightStatus(
+        bytes32 flight, uint8 status
+    ) external requireIsOperational requireIsCallerAuthorized requireFlight(flight)
+    {
+        flights[flight].statusCode = status;
+        flights[flight].updatedTimestamp = now;
+    }
+
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees() external pure
+    function creditInsurees(
+        bytes32 flight, uint256 multiplier
+    ) external requireIsOperational requireIsCallerAuthorized requireFlight(flight)
     {
+        Flight memory ended = flights[flight];
+        for(uint256 i = 0 ; i < ended.insurees.length ; i++) {
+            address client = ended.insurees[i];
+            uint256 earnings = clients[client].insurance[flight].mul(multiplier);
+            clients[client].funds = clients[client].funds.add(earnings);
+            delete clients[client].insurance[flight];
+        }
+        flights[flight].insurees = new address[](0);
+        flights[flight].updatedTimestamp = now;
     }
 
     /********************************************************************************************/
