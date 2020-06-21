@@ -37,7 +37,7 @@ contract FlightSuretyApp is Ownable, Operational {
 
     // Airline Management
     uint8 private constant MIN_AIRLINES_REGISTERED = 4;
-    uint256 private constant MIN_AIRLINE_FUNDS = 10;
+    uint256 private constant MIN_AIRLINE_FUNDS = 10 ether;
 
     struct QueuedAddress {
         mapping(address => bool) votes; // who voted
@@ -100,7 +100,7 @@ contract FlightSuretyApp is Ownable, Operational {
     * @dev Add an airline to the registration queue
     *
     */
-    function registerAirline(address airline) public fundedAirline returns(bool success, uint256 votes)
+    function registerAirline(address airline) public requireIsOperational fundedAirline returns(bool success, uint256 votes)
     {
         require(!datasource.isAirline(airline), "airline already registered");
         require(!queuedAirlines[airline].votes[msg.sender], "Already voted");
@@ -126,7 +126,7 @@ contract FlightSuretyApp is Ownable, Operational {
     * @dev Add funds to an airline.
     *
     */
-    function fund() external payable registeredAirline
+    function fund() external payable requireIsOperational registeredAirline
     {
         datasource.fundAirline.value(msg.value)(msg.sender);
     }

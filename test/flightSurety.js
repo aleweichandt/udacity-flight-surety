@@ -94,10 +94,11 @@ contract('Flight Surety Tests', async (accounts) => {
     
     // ARRANGE
     let newAirline = accounts[2];
+    const funds = web3.utils.toWei("1", "ether");
 
     // ACT
     try {
-        await config.flightSuretyApp.fund({from: config.firstAirline, value: 1});
+        await config.flightSuretyApp.fund({from: config.firstAirline, value: funds});
     }
     catch(e) {
 
@@ -105,7 +106,7 @@ contract('Flight Surety Tests', async (accounts) => {
     let result = await config.flightSuretyData.getAirlineFunds.call(config.firstAirline); 
 
     // ASSERT
-    assert.equal(result, 1, "Airline hasn't provided funding");
+    assert.equal(result, funds, "Airline hasn't provided funding");
 
   });
 
@@ -113,11 +114,11 @@ contract('Flight Surety Tests', async (accounts) => {
     
     // ARRANGE
     let newAirline = accounts[2];
-    try {
-        await config.flightSuretyApp.fund({from: config.firstAirline, value: 5});
-    } catch(e) { }
+    const funds = web3.utils.toWei("5", "ether");
+
     // ACT
     try {
+        await config.flightSuretyApp.fund({from: config.firstAirline, value: funds});
         await config.flightSuretyApp.registerAirline(newAirline, {from: config.firstAirline});
     }
     catch(e) {
@@ -134,12 +135,11 @@ contract('Flight Surety Tests', async (accounts) => {
     
     // ARRANGE
     let newAirline = accounts[2];
-    try {
-        await config.flightSuretyApp.fund({from: config.firstAirline, value: 10});
-    } catch(e) { }
+    const funds = web3.utils.toWei("10", "ether");
 
     // ACT
     try {
+        await config.flightSuretyApp.fund({from: config.firstAirline, value: funds});
         await config.flightSuretyApp.registerAirline(newAirline, {from: config.firstAirline});
     } catch(e) { }
     let result = await config.flightSuretyData.isAirline.call(newAirline); 
@@ -204,11 +204,12 @@ contract('Flight Surety Tests', async (accounts) => {
     // ARRANGE
     let thirdAirline = accounts[3];
     let fifthAirline = accounts[5];
+    const funds = web3.utils.toWei("10", "ether");
 
     // ACT
     try {
         //fund airline to be able to vote
-        await config.flightSuretyApp.fund({from: thirdAirline, value: 10});
+        await config.flightSuretyApp.fund({from: thirdAirline, value: funds});
         // requires 2 more votes
         await config.flightSuretyApp.registerAirline(fifthAirline, {from: thirdAirline});
         await config.flightSuretyApp.registerAirline(fifthAirline, {from: thirdAirline});
@@ -225,11 +226,12 @@ contract('Flight Surety Tests', async (accounts) => {
     // ARRANGE
     let fourthAirline = accounts[4];
     let fifthAirline = accounts[5];
+    const funds = web3.utils.toWei("10", "ether");
 
     // ACT
     try {
         //fund airline to be able to vote
-        await config.flightSuretyApp.fund({from: fourthAirline, value: 10});
+        await config.flightSuretyApp.fund({from: fourthAirline, value: funds});
         // already has 2 votes
         await config.flightSuretyApp.registerAirline(fifthAirline, {from: fourthAirline});
     } catch(e) {}
