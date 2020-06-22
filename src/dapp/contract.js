@@ -2,12 +2,14 @@ import FlightSuretyApp from '../../build/contracts/FlightSuretyApp.json';
 import Config from './config.json';
 import Web3 from 'web3';
 
+const GAS_MAX_AMOUNT = 9999999;
+
 export default class Contract {
     constructor(network, callback) {
 
         let config = Config[network];
         this.web3 = new Web3(new Web3.providers.HttpProvider(config.url));
-        this.flightSuretyApp = new this.web3.eth.Contract(FlightSuretyApp.abi, config.appAddress);
+        this.flightSuretyApp = new this.web3.eth.Contract(FlightSuretyApp.abi, config.appAddress, { gast: GAS_MAX_AMOUNT });
         this.initialize(callback);
         this.owner = null;
         this.airlines = [];
@@ -66,7 +68,7 @@ export default class Contract {
         self.flightSuretyApp.methods
             .registerAirline(newAirline)
             .send({ from: airline }, (error, response) => {
-                callback(error, response.returnValues);
+                callback(error, response);
             });
     }
 
@@ -85,7 +87,7 @@ export default class Contract {
         self.flightSuretyApp.methods
             .registerFlight(flight.name, flight.timestamp)
             .send({ from: flight.airline }, (error, response) => {
-                callback(error, response.returnValues);
+                callback(error, response);
             });
     }
 
@@ -123,7 +125,7 @@ export default class Contract {
         self.flightSuretyApp.methods
             .withdrawFunds(ether)
             .send({ from: passenger }, (error, response) => {
-                callback(error, response.returnValues);
+                callback(error, response);
             });
     }
 }

@@ -24,7 +24,68 @@
         <div id="display-wrapper" class="top-20">
         </div>
         <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+            <label class="form">Selected Airline</label>
+            <select name="airlines" id="airline-number">
+                <option value="0">Airline0</option>
+                <option value="1">Airline1</option>
+                <option value="2">Airline2</option>
+                <option value="3">Airline3</option>
+                <option value="4">Airline4</option>
+            </select>
+            <label class="form">Selected Flight</label>
+            <select name="flights" id="flight-number">
+                <option value="0">Airline0 - Flight</option>
+                <option value="1">Airline1 - Flight</option>
+                <option value="2">Airline2 - Flight</option>
+                <option value="3">Airline3 - Flight</option>
+                <option value="4">Airline4 - Flight</option>
+            </select>
+            <label class="form">Selected Passenger</label>
+            <select name="passengers" id="passenger-number">
+                <option value="0">Passenger0</option>
+                <option value="1">Passenger1</option>
+                <option value="2">Passenger2</option>
+                <option value="3">Passenger3</option>
+                <option value="4">Passenger4</option>
+            </select>
+        </div>
+        <div class="row top-20">
+            <label class="form">Register Airline</label>
+            <select name="airlines" id="target-airline-number">
+                <option value="0">Airline0</option>
+                <option value="1">Airline1</option>
+                <option value="2">Airline2</option>
+                <option value="3">Airline3</option>
+                <option value="4">Airline4</option>
+            </select>
+            <btn class="btn btn-primary" id="register-airline">Register</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Amount</label>
+            <input type="text" id="airline-funds">
+            <btn class="btn btn-primary" id="fund-airline">Fund Airline</btn>
+        </div>
+        <div class="row top-20">
+            <btn class="btn btn-primary" id="register-flight">Register Flight</btn>
+        </div>
+        <div class="row top-20">
+            <btn class="btn btn-primary" id="status-flight">Get Flight Status</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Amount</label>
+            <input type="text" id="insurance-funds">
+            <btn class="btn btn-primary" id="buy-insurance">Buy Flight Insurance for Passenger</btn>
+        </div>
+        <div class="row top-20">
+            <btn class="btn btn-primary" id="get-insurance">Get Flight Insurance for Passenger</btn>
+        </div>
+        <div class="row top-20">
+            <label class="form">Amount</label>
+            <input type="text" id="passenger-funds">
+            <btn class="btn btn-primary" id="get-funds">Withdraw Passenger Funds</btn>
+        </div>
+        <div class="row top-20">
+            <btn class="btn btn-primary" id="submit-oracle">Submit Flight to Oracles</btn>
         </div>
     </main>
 
