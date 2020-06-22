@@ -18,7 +18,7 @@ module.exports = async function (deployer, network, accounts) {
             dataAddress: FlightSuretyData.address,
             appAddress: FlightSuretyApp.address,
             owner: owner,
-            firstAirline: firstAirline
+            firstAirline: firstAirline,
         }
     }
     fs.writeFileSync(__dirname + '/../src/dapp/config.json',JSON.stringify(config, null, '\t'), 'utf-8');

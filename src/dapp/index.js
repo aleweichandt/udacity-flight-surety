@@ -53,7 +53,7 @@ import './flightsurety.css';
             const amount = DOM.elid('airline-funds').value;
             // Write transaction
             contract.fundAirline(airline, amount, (error, result) => {
-                display('Airlines', 'Fund', [ { label: 'Fund Airline', error: error, value: result + 'Ether'} ]);
+                display('Airlines', 'Fund', [ { label: 'Fund Airline', error: error, value: result + " ETH"} ]);
             });
         });
 
@@ -62,14 +62,6 @@ import './flightsurety.css';
             // Write transaction
             contract.registerFlight(flight, (error, result) => {
                 display('Flights', 'Register', [ { label: 'Register Flight', error: error, value: result } ]);
-            });
-        });
-
-        DOM.elid('status-flight').addEventListener('click', () => {
-            const flight = getFlight();
-            // Write transaction
-            contract.getFlightStatus(flight, (error, result) => {
-                display('Flights', 'Status', [ { label: 'Status for Flight', error: error, value: result } ]);
             });
         });
 
@@ -88,7 +80,7 @@ import './flightsurety.css';
             const flight = getFlight();
             // Write transaction
             contract.getFlightInsurance(passenger, flight, (error, result) => {
-                display('Passengers', 'Insurance', [ { label: 'Get insurance', error: error, value: result } ]);
+                display('Passengers', 'Insurance', [ { label: 'Get insurance', error: error, value: result + " ETH" } ]);
             });
         });
 
