@@ -138,7 +138,7 @@ contract FlightSuretyApp is Ownable, Operational {
     function hasEnoughVotes(address airline) internal view returns (bool)
     {
         uint256 count = datasource.getAirlinesCount();
-        return count < MIN_AIRLINES_REGISTERED || count.div(2) < queuedAirlines[airline].votesCount;
+        return count < MIN_AIRLINES_REGISTERED || count < queuedAirlines[airline].votesCount.mul(2);
     }
 
    /**
